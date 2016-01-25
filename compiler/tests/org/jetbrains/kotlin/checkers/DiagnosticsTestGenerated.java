@@ -12404,6 +12404,12 @@ public class DiagnosticsTestGenerated extends AbstractDiagnosticsTest {
                     doTest(fileName);
                 }
 
+                @TestMetadata("onTypeProjection.kt")
+                public void testOnTypeProjection() throws Exception {
+                    String fileName = KotlinTestUtils.navigationMetadata("compiler/testData/diagnostics/tests/platformTypes/notNullTypeParameter/onTypeProjection.kt");
+                    doTest(fileName);
+                }
+
                 @TestMetadata("substitutionInSuperType.kt")
                 public void testSubstitutionInSuperType() throws Exception {
                     String fileName = KotlinTestUtils.navigationMetadata("compiler/testData/diagnostics/tests/platformTypes/notNullTypeParameter/substitutionInSuperType.kt");
