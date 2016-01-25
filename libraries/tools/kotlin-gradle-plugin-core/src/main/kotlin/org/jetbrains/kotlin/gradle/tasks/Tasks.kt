@@ -60,7 +60,7 @@ abstract class AbstractKotlinCompile<T : CommonCompilerArguments>() : AbstractCo
     abstract protected fun populateTargetSpecificArgs(args: T)
 
     var kotlinOptions: T = createBlankArgs()
-    var kotlinDestinationDir: File? = destinationDir
+    var classesDir: File? = destinationDir
 
     private val loggerInstance = Logging.getLogger(this.javaClass)
     override fun getLogger() = loggerInstance
@@ -168,7 +168,7 @@ open class KotlinCompile() : AbstractKotlinCompile<K2JVMCompilerArguments>() {
         }
 
         args.destination = if (StringUtils.isEmpty(kotlinOptions.destination)) {
-            kotlinDestinationDir?.path
+            destinationDir?.path
         } else {
             kotlinOptions.destination
         }
@@ -346,13 +346,13 @@ open class KotlinCompile() : AbstractKotlinCompile<K2JVMCompilerArguments>() {
         }
 
         fun cleanupOnError() {
-            val outputDirFile = File(args.destination!!)
-
-            assert(outputDirFile.exists())
-            val generatedRelPaths = allGeneratedFiles.map { it.outputFile.toRelativeString(outputDirFile) }
-            logger.kotlinInfo("deleting output on error: ${generatedRelPaths.joinToString()}")
-
-            allGeneratedFiles.forEach { it.outputFile.delete() }
+//            val outputDirFile = File(args.destination!!)
+//
+//            assert(outputDirFile.exists())
+//            val generatedRelPaths = allGeneratedFiles.map { it.outputFile.toRelativeString(outputDirFile) }
+//            logger.kotlinInfo("deleting output on error: ${generatedRelPaths.joinToString()}")
+//
+//            allGeneratedFiles.forEach { it.outputFile.delete() }
         }
 
         fun outputRelativePath(f: File) = f.toRelativeString(outputDir)
@@ -523,12 +523,13 @@ open class KotlinCompile() : AbstractKotlinCompile<K2JVMCompilerArguments>() {
     private fun File.isJavaFile() = extension.equals(JavaFileType.INSTANCE.defaultExtension, ignoreCase = true)
 
     override fun afterCompileHook(args: K2JVMCompilerArguments) {
-        logger.debug("Copying resulting files to classes")
-
-        // Copy kotlin classes to all classes directory
-        val outputDirFile = File(args.destination!!)
-        if (outputDirFile.exists()) {
-            FileUtils.copyDirectory(outputDirFile, destinationDir)
+        classesDir?.let {
+            if (it.canonicalFile != destinationDir.canonicalFile) {
+                logger.kotlinInfo("Copying resulting files to classes directory")
+                if (!it.exists())
+                    it.mkdirs()
+                FileUtils.copyDirectory(destinationDir, it)
+            }
         }
     }
 

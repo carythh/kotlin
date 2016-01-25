@@ -31,7 +31,6 @@ fun Project.initKapt(
         javaTask: AbstractCompile,
         kaptManager: AnnotationProcessingManager,
         variantName: String,
-        kotlinOutputDir: File,
         subpluginEnvironment: SubpluginEnvironment,
         taskFactory: (suffix: String) -> AbstractCompile
 ): AbstractCompile? {
@@ -39,7 +38,7 @@ fun Project.initKapt(
     val kotlinAfterJavaTask: AbstractCompile?
 
     if (kaptExtension.generateStubs) {
-        kotlinAfterJavaTask = createKotlinAfterJavaTask(javaTask, kotlinOutputDir, taskFactory)
+        kotlinAfterJavaTask = createKotlinAfterJavaTask(javaTask, taskFactory)
 
         kotlinTask.logger.kotlinDebug("kapt: Using class file stubs")
 
@@ -85,11 +84,9 @@ fun Project.initKapt(
 
 private fun Project.createKotlinAfterJavaTask(
         javaTask: AbstractCompile,
-        kotlinOutputDir: File,
         taskFactory: (suffix: String) -> AbstractCompile
 ): AbstractCompile {
     val kotlinAfterJavaTask = with (taskFactory(KOTLIN_AFTER_JAVA_TASK_SUFFIX)) {
-        setProperty("kotlinDestinationDir", kotlinOutputDir)
         destinationDir = javaTask.destinationDir
         classpath = javaTask.classpath
         this
