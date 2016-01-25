@@ -346,10 +346,13 @@ open class KotlinCompile() : AbstractKotlinCompile<K2JVMCompilerArguments>() {
         }
 
         fun cleanupOnError() {
-            allGeneratedFiles.forEach {
-                logger.kotlinInfo("deleting output on error: ${it.outputFile}")
-                it.outputFile.delete()
-            }
+            val outputDirFile = File(args.destination!!)
+
+            assert(outputDirFile.exists())
+            val generatedRelPaths = allGeneratedFiles.map { it.outputFile.toRelativeString(outputDirFile) }
+            logger.kotlinInfo("deleting output on error: ${generatedRelPaths.joinToString()}")
+
+            allGeneratedFiles.forEach { it.outputFile.delete() }
         }
 
         fun outputRelativePath(f: File) = f.toRelativeString(outputDir)
