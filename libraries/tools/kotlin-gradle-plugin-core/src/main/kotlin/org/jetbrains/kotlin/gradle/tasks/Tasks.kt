@@ -61,6 +61,8 @@ abstract class AbstractKotlinCompile<T : CommonCompilerArguments>() : AbstractCo
 
     var kotlinOptions: T = createBlankArgs()
     var classesDir: File? = destinationDir
+    // TODO: consider more reliable approach (see usage)
+    var anyClassesCompiled: Boolean = false
 
     private val loggerInstance = Logging.getLogger(this.javaClass)
     override fun getLogger() = loggerInstance
@@ -358,6 +360,8 @@ open class KotlinCompile() : AbstractKotlinCompile<K2JVMCompilerArguments>() {
         fun outputRelativePath(f: File) = f.toRelativeString(outputDir)
 
 
+        anyClassesCompiled = false
+
         // TODO: decide what to do if no files are considered dirty - rebuild or skip the module
         var (sourcesToCompile, isIncrementalDecided) = calculateSourcesToCompile()
 
@@ -447,6 +451,9 @@ open class KotlinCompile() : AbstractKotlinCompile<K2JVMCompilerArguments>() {
         lookupStorage.flush(false)
         lookupStorage.close()
         caches.values.forEach { it.flush(false); it.close() }
+        if (allGeneratedFiles.isNotEmpty()) {
+            anyClassesCompiled = true
+        }
     }
 
     private data class CompileChangedResults(val exitCode: ExitCode, val generatedFiles: List<GeneratedFile<TargetId>>)
