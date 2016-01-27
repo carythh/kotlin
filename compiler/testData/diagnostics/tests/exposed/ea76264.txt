@@ -1,0 +1,3 @@
+package
+
+public val p: [ERROR : Type for ::p]
